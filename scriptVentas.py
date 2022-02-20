@@ -67,6 +67,7 @@ class Script:
         reporteVentas = ReporteVentas()
         producto = Producto()
         cadProd = ""
+        indice1 = 0
         indice2 = 0
         for linea in self.data.split('\n'):
             for caracter in linea:
@@ -77,15 +78,16 @@ class Script:
                     reporteVentas.setPeriodo((self.data[self.data.index(':')+1:self.data.index('=') - 1]).strip())
                     indice2 = self.data.index('=')
                 elif caracter == '[':
-                    cadProd = self.data[indice2+1:(self.data.find(']', indice2+1))].strip()
+                    indice1 = self.data.find('[', indice1)+1
+                    cadProd = self.data[indice1:(self.data.find(']', indice1+2))].strip()
                     detalles = cadProd.split(',')
                     producto.setNombre(detalles[0].replace("\"", ""))
                     producto.setPrecio(detalles[1])
                     producto.setVentas(detalles[2])
                     self.listaProds.append(producto)
                     producto = Producto()
-                    indice2 = self.data.find(']', indice2)
                 indice2 += 1
+                indice1 += 1
         reporteVentas.setProductos(self.listaProds)
         a = 1
 
