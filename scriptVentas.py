@@ -6,7 +6,8 @@ from pip._vendor.distlib.compat import raw_input
 from ProductoScript import Producto
 from InstruccionScript import Instruccion
 from ReporteVentasScript import ReporteVentas
-
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Script:
     data = ""
@@ -58,7 +59,7 @@ class Script:
         nombre_archivo = filedialog.askopenfilename(initialdir="/", title="Seleccionar un archivo",
                                                     filetypes=(("texto", "*.lfp"), ("todos", "*.*")))
         try:
-            archivo = open(nombre_archivo, "r")
+            archivo = open(nombre_archivo, "r",encoding='utf-8')
             self.instrucciones += archivo.read()
         except FileNotFoundError:
             print("archivo no encontrado")
@@ -72,14 +73,14 @@ class Script:
         for linea in self.data.split('\n'):
             for caracter in linea:
                 if caracter == ':':
-                    reporteVentas.setMes(self.data[0:self.data.index(':')-1])
+                    reporteVentas.setMes(self.data[0:self.data.index(':') - 1])
                     indice2 = self.data.index(':')
                 elif caracter == '=':
-                    reporteVentas.setPeriodo((self.data[self.data.index(':')+1:self.data.index('=') - 1]).strip())
+                    reporteVentas.setPeriodo((self.data[self.data.index(':') + 1:self.data.index('=') - 1]).strip())
                     indice2 = self.data.index('=')
                 elif caracter == '[':
-                    indice1 = self.data.find('[', indice1)+1
-                    cadProd = self.data[indice1:(self.data.find(']', indice1+2))].strip()
+                    indice1 = self.data.find('[', indice1) + 1
+                    cadProd = self.data[indice1:(self.data.find(']', indice1 + 2))].strip()
                     detalles = cadProd.split(',')
                     producto.setNombre(detalles[0].replace("\"", ""))
                     producto.setPrecio(detalles[1])
@@ -90,7 +91,42 @@ class Script:
                 indice1 += 1
         reporteVentas.setProductos(self.listaProds)
 
+        nuevaCadena = re.sub(r'\n', " ", self.instrucciones)
+        nuevaCadena = re.sub(r'<¿ | \?>', '', nuevaCadena)
+        res = dict(item.split(":") for item in nuevaCadena.split(", "))
 
+        datosGrafica = {}
+        clave = []
+        valor = []
+        for producto in reporteVentas.getProductos():
+            clave.append(re.sub("\"", "", producto.getNombre()))
+
+        for producto in reporteVentas.getProductos():
+            valor.append(producto.getVentas())
+
+        for i in clave:
+            datosGrafica[i] = valor[i]
+
+        nombres = list(datosGrafica.keys())
+        valores = list(datosGrafica.values())
+        fig, axs = plt.subplots(1, 3, figsize=(9, 3), sharey=True)
+
+        for clave in res:
+            if str(clave).lower() == "nombre":
+                plt.suptitle(res[clave])
+            elif str(clave).lower() == "grafica":
+                if str(res[clave]).lower() == "barras":
+                    axs[0].bar(nombres, valores)
+                elif str(res[clave]).lower() == "lineas":
+                    pass
+                elif str(res[clave]).lower() == "pie":
+                    pass
+            elif str(clave).lower() == "titulo":
+                pass
+            elif str(clave).lower() == "titulox":
+                pass
+            elif str(clave).lower() == "titulox":
+                pass
 
     def generarReporte(self):
         pass
