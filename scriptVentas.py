@@ -8,6 +8,8 @@ from InstruccionScript import Instruccion
 from ReporteVentasScript import ReporteVentas
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+
 
 class Script:
     data = ""
@@ -44,7 +46,7 @@ class Script:
 
     def cargarData(self):
         root = tk.Tk()
-        root.withdraw()
+
         nombre_archivo = filedialog.askopenfilename(initialdir="/", title="Seleccionar un archivo",
                                                     filetypes=(("texto", "*.data"), ("todos", "*.*")))
         try:
@@ -55,11 +57,10 @@ class Script:
 
     def cargarInstrucciones(self):
         root = tk.Tk()
-        root.withdraw()
         nombre_archivo = filedialog.askopenfilename(initialdir="/", title="Seleccionar un archivo",
                                                     filetypes=(("texto", "*.lfp"), ("todos", "*.*")))
         try:
-            archivo = open(nombre_archivo, "r",encoding='utf-8')
+            archivo = open(nombre_archivo, "r", encoding='utf-8')
             self.instrucciones += archivo.read()
         except FileNotFoundError:
             print("archivo no encontrado")
@@ -93,6 +94,7 @@ class Script:
 
         nuevaCadena = re.sub(r'\n', " ", self.instrucciones)
         nuevaCadena = re.sub(r'<¿ | \?>', '', nuevaCadena)
+        nuevaCadena = re.sub(r'\"', '', nuevaCadena)
         res = dict(item.split(":") for item in nuevaCadena.split(", "))
 
         datosGrafica = {}
@@ -102,31 +104,49 @@ class Script:
             clave.append(re.sub("\"", "", producto.getNombre()))
 
         for producto in reporteVentas.getProductos():
-            valor.append(producto.getVentas())
+            valor.append(int(producto.getVentas()))
 
-        for i in clave:
-            datosGrafica[i] = valor[i]
+        datosGrafica = dict(zip(clave, valor))
 
-        nombres = list(datosGrafica.keys())
-        valores = list(datosGrafica.values())
-        fig, axs = plt.subplots(1, 3, figsize=(9, 3), sharey=True)
-
+        nombres_x = list(datosGrafica.keys())
+        valores_y = list(datosGrafica.values())
+        filename = ""
+        barras = False
+        pie = False
+        lineas = False
         for clave in res:
             if str(clave).lower() == "nombre":
-                plt.suptitle(res[clave])
+                dir = os.path.dirname(__file__)
+                filename += os.path.join(dir, str(clave) + ".jpg")
             elif str(clave).lower() == "grafica":
-                if str(res[clave]).lower() == "barras":
-                    axs[0].bar(nombres, valores)
-                elif str(res[clave]).lower() == "lineas":
-                    pass
-                elif str(res[clave]).lower() == "pie":
-                    pass
+                if "barras" in str(res[clave]).lower():
+                    barras = True
+                elif "lineas" in str(res[clave]).lower():
+                    lineas = True
+                elif "pie" in str(res[clave]).lower():
+                    pie = True
             elif str(clave).lower() == "titulo":
-                pass
+                plt.title(res[clave])
             elif str(clave).lower() == "titulox":
-                pass
-            elif str(clave).lower() == "titulox":
-                pass
+                plt.xlabel(res[clave])
+            elif str(clave).lower() == "tituloy":
+                plt.ylabel(res[clave])
+
+        particiones = []
+        contador = 0
+        total = sum(valores_y)
+        for item in valores_y:
+            particiones.append(int(round((item / total) * 100)))
+
+        if barras:
+            plt.bar(nombres_x, valores_y)
+        elif pie:
+            plt.pie(particiones, labels=nombres_x)
+        elif lineas:
+            plt.plot(nombres_x, valores_y)
+        plt.savefig(filename)
+        plt.show()
+
 
     def generarReporte(self):
         pass
