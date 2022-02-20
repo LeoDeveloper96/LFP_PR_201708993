@@ -4,8 +4,10 @@ class ReporteVentas:
         self.mes = None
         self.periodo = None
         self.productos = None
+        self.instrucciones = None
 
-        # Setters
+    # Setters
+
     def setMes(self, mes):
         self.mes = mes
 
@@ -15,7 +17,11 @@ class ReporteVentas:
     def setProductos(self, productos):
         self.productos = productos
 
+    def setInstrucciones(self, instrucciones):
+        self.instrucciones = instrucciones
+
     # Getters
+
     def getMes(self):
         return self.mes
 
@@ -25,3 +31,5 @@ class ReporteVentas:
     def getProductos(self):
         return self.productos
 
+    def setInstrucciones(self):
+        return self.instrucciones

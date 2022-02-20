@@ -56,7 +56,7 @@ class Script:
         root = tk.Tk()
         root.withdraw()
         nombre_archivo = filedialog.askopenfilename(initialdir="/", title="Seleccionar un archivo",
-                                                    filetypes=(("texto", "*.data"), ("todos", "*.*")))
+                                                    filetypes=(("texto", "*.lfp"), ("todos", "*.*")))
         try:
             archivo = open(nombre_archivo, "r")
             self.instrucciones += archivo.read()
@@ -89,8 +89,6 @@ class Script:
                 indice2 += 1
                 indice1 += 1
         reporteVentas.setProductos(self.listaProds)
-        a = 1
-
 
 
 
